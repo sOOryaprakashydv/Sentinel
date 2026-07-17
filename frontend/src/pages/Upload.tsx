@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LuUploadCloud, LuFile, LuLoaderCircle } from "react-icons/lu";
+import { LuUpload, LuFile, LuLoaderCircle } from "react-icons/lu";
 import { sentinelApi, extractApiError } from "@/services/api";
 
 const SUPPORTED = [".exe", ".dll", ".apk", ".pdf", ".doc(x)", ".xls(x)", ".ppt(x)", ".zip", ".js", ".ps1", ".py", ".bat"];
@@ -61,7 +61,7 @@ export default function Upload() {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3">
-            <LuUploadCloud size={36} className="text-ink-500" />
+            <LuUpload size={36} className="text-ink-500" />
             <div className="text-ink-700 font-medium">Drag and drop a file here</div>
             <div className="text-xs text-ink-500">or</div>
             <label className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition-colors">
