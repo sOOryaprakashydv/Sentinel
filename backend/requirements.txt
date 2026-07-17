@@ -1,0 +1,34 @@
+# --- Web framework ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+
+# --- Config / validation ---
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# --- Database ---
+SQLAlchemy==2.0.35
+
+# --- HTTP client (threat intelligence) ---
+requests==2.32.3
+
+# --- Static analysis ---
+pefile==2023.2.7
+androguard==4.1.2
+oletools==0.60.2
+PyPDF2==3.0.1
+python-magic-bin==0.4.14; sys_platform == "win32"
+python-magic==0.4.27; sys_platform != "win32"
+yara-python==4.5.1
+
+# --- AI ---
+google-generativeai==0.8.3
+
+# --- Reports ---
+reportlab==4.2.5
+Jinja2==3.1.4
+
+# --- Testing ---
+pytest==8.3.3
+httpx==0.27.2

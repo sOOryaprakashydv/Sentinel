@@ -1,0 +1,25 @@
+# Python
+**/__pycache__/
+**/*.pyc
+.venv/
+venv/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Runtime data (created fresh in the image)
+uploads/*
+reports/*
+logs/*
+*.db
+
+# Env / secrets — never bake these into the image
+.env
+
+# Misc
+.git/
+.gitignore
+tests/
+docs/
+*.md

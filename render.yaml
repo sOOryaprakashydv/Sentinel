@@ -1,0 +1,35 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec).
+# In the Render dashboard: New -> Blueprint -> point at this repo, and Render
+# reads this file automatically. Everything below can also be set up by hand
+# via New -> Web Service -> Docker if you'd rather not use a Blueprint.
+services:
+  - type: web
+    name: sentinel
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////app/sentinel.db
+      - key: UPLOAD_DIRECTORY
+        value: /app/uploads
+      - key: REPORT_DIRECTORY
+        value: /app/reports
+      - key: LOG_DIRECTORY
+        value: /app/logs
+      # Optional — leave unset and the app runs in degraded mode (no threat
+      # intel / Gemini AI, everything else still works). Set these in the
+      # Render dashboard under Environment; sync:false keeps them out of git.
+      - key: VT_API_KEY
+        sync: false
+      - key: MALWAREBAZAAR_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+# Note on persistence: Render's free plan has an ephemeral filesystem —
+# uploads/reports/the SQLite DB reset on every deploy or restart. That's
+# fine for demoing the workflow. For durable storage, add a paid persistent
+# Disk (https://render.com/docs/disks) mounted at /app, or migrate
+# DATABASE_URL to a managed Postgres instance (Render offers a free one).

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sentinel Investigation Report — {{ data.file_information.filename }}</title>
+<style>
+  :root {
+    --primary: #1d4ed8; --critical: #dc2626; --high: #ea580c; --medium: #d97706;
+    --low: #16a34a; --info: #6b7280; --bg-soft: #f3f4f6; --border: #e5e7eb;
+  }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #111827; margin: 0; padding: 0; background: #fff; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px; }
+  .cover { text-align: center; padding: 80px 20px; border-bottom: 4px solid var(--primary); }
+  .cover h1 { font-size: 32px; color: var(--primary); margin-bottom: 4px; }
+  .cover .subtitle { color: #6b7280; font-size: 14px; }
+  section { margin: 32px 0; page-break-inside: avoid; }
+  h2 { font-size: 18px; color: var(--primary); border-bottom: 2px solid var(--border); padding-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--bg-soft); }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; color: #fff; font-weight: 600; }
+  .badge.Critical { background: var(--critical); }
+  .badge.High { background: var(--high); }
+  .badge.Medium { background: var(--medium); }
+  .badge.Low { background: var(--low); }
+  .badge.Informational { background: var(--info); }
+  .score { font-size: 48px; font-weight: 700; color: var(--primary); }
+  .kv { display: grid; grid-template-columns: 200px 1fr; gap: 6px 12px; font-size: 13px; }
+  .findings li, .recs li { margin: 4px 0; }
+  .muted { color: #6b7280; font-size: 12px; }
+  footer { text-align: center; color: #9ca3af; font-size: 11px; margin-top: 60px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="cover">
+    <h1>Sentinel Investigation Report</h1>
+    <div class="subtitle">Case {{ data.case_information.case_id or "—" }} · Investigation #{{ data.case_information.investigation_id }}</div>
+    <div class="subtitle">Generated {{ data.generated_at }}</div>
+  </div>
+
+  {% if data.ai_summary %}
+  <section>
+    <h2>Executive Summary</h2>
+    <p>{{ data.ai_summary.executive_summary }}</p>
+    <p class="muted">AI confidence: {{ (data.ai_summary.confidence * 100) | round(0) }}% · Source: {{ data.ai_summary.source }}</p>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>Case Information</h2>
+    <div class="kv">
+      <div>Case Number</div><div>{{ data.cover.case_number or "—" }}</div>
+      <div>Investigator</div><div>{{ data.cover.investigator or "—" }}</div>
+      <div>Status</div><div>{{ data.case_information.status }}</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>File Identification</h2>
+    <div class="kv">
+      <div>Filename</div><div>{{ data.file_information.filename }}</div>
+      <div>Size</div><div>{{ data.file_information.size }} bytes</div>
+      <div>Type</div><div>{{ data.file_information.file_type }}</div>
+      <div>MIME</div><div>{{ data.file_information.mime }}</div>
+      <div>Uploaded</div><div>{{ data.file_information.uploaded_at }}</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Hash Values</h2>
+    <div class="kv">
+      <div>SHA256</div><div>{{ data.hashes.sha256 }}</div>
+      <div>SHA1</div><div>{{ data.hashes.sha1 }}</div>
+      <div>MD5</div><div>{{ data.hashes.md5 }}</div>
+    </div>
+  </section>
+
+  {% if data.static_analysis %}
+  <section>
+    <h2>Static Analysis</h2>
+    <p>Entropy: {{ data.static_analysis.entropy }} · Packed: {{ data.static_analysis.is_packed }}</p>
+    <ul class="findings">
+      {% for f in data.static_analysis.security_findings %}
+      <li><strong>[{{ f.severity | upper }}]</strong> {{ f.title }} — {{ f.detail }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>Indicators of Compromise</h2>
+    <table>
+      <tr><th>Type</th><th>Value</th><th>Confidence</th><th>Source</th><th>Status</th></tr>
+      {% for i in data.iocs %}
+      <tr><td>{{ i.type }}</td><td>{{ i.value }}</td><td>{{ (i.confidence*100)|round(0) }}%</td><td>{{ i.source }}</td><td>{{ i.status }}</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section>
+    <h2>Threat Intelligence</h2>
+    <table>
+      <tr><th>Provider</th><th>Status</th><th>Family</th><th>Detections</th></tr>
+      {% for t in data.threat_intelligence %}
+      <tr><td>{{ t.provider }}</td><td>{{ t.status }}</td><td>{{ t.malware_family or "—" }}</td>
+          <td>{{ t.detections }}{% if t.total_engines %} / {{ t.total_engines }}{% endif %}</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  {% if data.risk_assessment %}
+  <section>
+    <h2>Risk Assessment</h2>
+    <div class="score">{{ data.risk_assessment.score }}</div>
+    <span class="badge {{ data.risk_assessment.severity }}">{{ data.risk_assessment.severity }}</span>
+    <p class="muted">Confidence: {{ (data.risk_assessment.confidence*100)|round(0) }}%</p>
+    <ul class="findings">
+      {% for r in data.risk_assessment.reasons %}
+      <li>✔ {{ r.label }} (+{{ r.points }})</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>MITRE ATT&amp;CK</h2>
+    <table>
+      <tr><th>Technique</th><th>Name</th><th>Tactic</th><th>Confidence</th></tr>
+      {% for m in data.mitre_attack %}
+      <tr><td>{{ m.technique_id }}</td><td>{{ m.technique_name }}</td><td>{{ m.tactic }}</td>
+          <td>{{ (m.confidence*100)|round(0) }}%</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  {% if data.ai_summary %}
+  <section>
+    <h2>AI Investigation Summary</h2>
+    <p style="white-space: pre-line;">{{ data.ai_summary.technical_summary }}</p>
+    <h3>Recommendations</h3>
+    <ul class="recs">
+      {% for r in data.ai_summary.recommendations %}
+      <li>• {{ r }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>Investigation Timeline</h2>
+    <table>
+      <tr><th>Stage</th><th>Status</th><th>Timestamp</th></tr>
+      {% for e in data.timeline %}
+      <tr><td>{{ e.stage }}</td><td>{{ e.status }}</td><td>{{ e.timestamp }}</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <footer>Generated by Sentinel — AI-Assisted Malware Investigation Platform. For official investigative use.</footer>
+</div>
+</body>
+</html>
